@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+version: '3.6'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: unless-stopped
+    hostname: '{{ gitlab.hostname }}'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '{{ gitlab.url_with_protocol }}'
+        letsencrypt['enable'] = false
+    ports:
+      - '{{ gitlab.ports.http }}:80'
+      - '{{ gitlab.ports.https }}:443'
+      - '{{ gitlab.ports.ssh }}:22'
+    volumes:
+      - '{{ gitlab.working_dir }}/config:/etc/gitlab'
+      - '{{ gitlab.working_dir }}/logs:/var/log/gitlab'
+      - '{{ gitlab.working_dir }}/data:/var/opt/gitlab'
+    shm_size: '256m'
+

@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+# {{ ansible_managed }}
+
+log () {
+  echo $(date +"%Y-%m-%d %k:%M:%S") $1
+}
+
+date=$(date +"%Y%m%d")
+
+backupPath="{{ gitlab.backup.dir }}"
+configSourcePath="{{ gitlab.working_dir }}/config"
+dataSourcePath="{{ gitlab.working_dir }}/data/backups"
+
+log "docker exec gitlab-backup create ..."
+docker exec -t gitlab_gitlab_1 gitlab-backup create
+log "... done"
+
+log "tar gitlab config ..."
+tar cvfz $backupPath/gitlab_config_$date.tgz $configSourcePath
+log "... done"
+
+log "move gitlab data backup ..."
+mv $dataSourcePath/* $backupPath
+log "... done"
+
+chown {{ gitlab.user }} $backupPath/*
+chmod 440 $backupPath/*
+

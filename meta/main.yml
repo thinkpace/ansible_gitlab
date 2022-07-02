@@ -1,0 +1,16 @@
+galaxy_info:
+  author: Tobias Baus <tobias@tobiasbaus.de>
+  description: Simple role to run GitLab on Docker
+
+  license: AGPL-3.0-only
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+      - focal
+
+  galaxy_tags: []
+
+dependencies: []

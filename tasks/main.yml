@@ -1,0 +1,36 @@
+---
+- name: Create working directory
+  ansible.builtin.file:
+    path: '{{ gitlab.working_dir }}'
+    mode: 0775
+    state: directory
+- name: Create working directory
+  ansible.builtin.file:
+    path: '{{ gitlab.backup.dir }}'
+    mode: 0550
+    owner: '{{ gitlab.user }}'
+    state: directory
+- name: Copy docker-compose.yml for GitLab
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: '{{ gitlab.working_dir }}/docker-compose.yml'
+    owner: '{{ gitlab.user }}'
+    mode: 0664
+- name: Copy backupGitlab.sh 
+  ansible.builtin.template:
+    src: backupGitlab.sh.j2
+    dest: '{{ gitlab.working_dir }}/backupGitlab.sh'
+    owner: '{{ gitlab.user }}'
+    mode: 0775
+- name: Schedule cron backupGitlab
+  ansible.builtin.cron:
+    name: Backup Gitlab
+    hour: '{{ gitlab.backup.hour }}'
+    minute: '{{ gitlab.backup.minute }}'
+    user: 'root'
+    job: '{{ gitlab.working_dir }}/backupGitlab.sh >> /var/log/backupGitlab.log 2>&1'
+# FIXME Migrate to native docker compose (without hyphen) as soon as Ansible module is supporting it
+- name: Start GitLab
+  community.docker.docker_compose:
+    project_src: '{{ gitlab.working_dir }}'
+    state: present
